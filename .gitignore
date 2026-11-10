@@ -7,3 +7,14 @@ __pycache__/
 .claude/
 .codex/
 **/.vite/
+.venv/
+/output/baseline/
+/article/main.aux
+/article/main.bbl
+/article/main.blg
+/article/main.fdb_latexmk
+/article/main.fls
+/article/main.log
+/article/main.out
+/article/main.pdf
+/article/main.synctex.gz

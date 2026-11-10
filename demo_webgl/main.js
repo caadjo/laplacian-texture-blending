@@ -66,6 +66,7 @@ const FinalCombinePassShader = {
         'enable': { value: 0.5 },
         'zoom': { value: 2.0 },
         'mip': { value: 6.0 },
+        'stride': { value: 1 },
         'aspectRatio' : { value: 1.0 },
     },
     vertexShader: passthroughVS,
@@ -85,49 +86,48 @@ const FinalCombinePassShader = {
         uniform float enable;
         uniform float zoom;
         uniform int mip;
+        uniform int stride;
 
         uniform float aspectRatio;
 
         varying vec2 vUv;
 
+        // The demo stores the mask pyramid in separate render targets.
+        vec4 sampleMask(vec2 uv, int lod) {
+            if (lod == 0) return texture2D(m1, uv);
+            if (lod == 1) return texture2D(m2, uv);
+            if (lod == 2) return texture2D(m3, uv);
+            if (lod == 3) return texture2D(m4, uv);
+            if (lod == 4) return texture2D(m5, uv);
+            if (lod == 5) return texture2D(m6, uv);
+            return texture2D(m7, uv);
+        }
+
 		void main() {
             vec2 uv = vUv / vec2(zoom);
             uv.x *= aspectRatio;
 
-            vec4 accum = vec4(0.0);
-            
-
-            #define LVL_CNT 6
-            vec4 mips0[LVL_CNT+1], mips1[LVL_CNT+1], mm[8];
-            
-            #pragma unroll
-            for (int i = 0; i < LVL_CNT + 1; i += 1) {
-                mips0[i] = texture2D(t0, uv, float(i));
-                mips1[i] = texture2D(t1, uv, float(i));
-            }
-            
-            mm[0] = texture2D(m0, uv);
-            mm[1] = texture2D(m1, uv);
-            mm[2] = texture2D(m2, uv);
-            mm[3] = texture2D(m3, uv);
-            mm[4] = texture2D(m4, uv);
-            mm[5] = texture2D(m5, uv);
-            mm[6] = texture2D(m6, uv);
-            mm[7] = texture2D(m7, uv);
-            
-            for (int i = 0; i < int(mip); i += 1) {
-                vec4 l0 = mips0[i] - mips0[i+1];
-                vec4 l1 = mips1[i] - mips1[i+1];
-                accum += l0 * mm[i+1] + l1 * (vec4(1.0)-mm[i+1]);
-            }
-            accum += mips0[mip] * mm[mip+1] + mips1[mip] * (vec4(1.0)-mm[mip+1]);
-
+            vec4 fine0 = texture2D(t0, uv);
+            vec4 fine1 = texture2D(t1, uv);
             if (enable < 1.0) {
-                vec4 m = mm[mip+1];
-                vec4 basicBlend = texture2D(t0, uv) * m + texture2D(t1, uv) * (vec4(1.0)-m);                
-                accum = basicBlend;
+                gl_FragColor = mix(fine1, fine0, sampleMask(uv, mip));
+                return;
             }
-			gl_FragColor = accum;
+
+            vec4 accum = vec4(0.0);
+            int fine = 0;
+            for (int band = 0; band < 6; band++) {
+                if (fine >= mip) break;
+                int coarse = fine + stride;
+                if (coarse > mip) coarse = mip;
+                vec4 coarse0 = texture2D(t0, uv, float(coarse));
+                vec4 coarse1 = texture2D(t1, uv, float(coarse));
+                accum += mix(fine1 - coarse1, fine0 - coarse0, sampleMask(uv, fine));
+                fine = coarse;
+                fine0 = coarse0;
+                fine1 = coarse1;
+            }
+            gl_FragColor = accum + mix(fine1, fine0, sampleMask(uv, mip));
 		}`
 };
 
@@ -137,6 +137,7 @@ const params = {
     threshold: 0.6,
     zoom: 2.5,
     mip: 5.0,
+    stride: 1,
     tex0: 1,
     tex1: 3,
     save: saveAsImage,
@@ -204,6 +205,7 @@ function init() {
     gui.add(params, 'threshold', 0.0, 1.0);
     gui.add(params, 'zoom', 1.0, 4.0);
     gui.add(params, 'mip', 0, 6, 1.0);
+    gui.add(params, 'stride', 1, 2, 1).name('Passo dos níveis');
     gui.add(params, 'tex0', { Texture0: 0, Texture1: 1, Texture0Rotated: 2, Texture1Rotated: 3, Normal0: 4, Normal1: 5});
     gui.add(params, 'tex1', { Texture0: 0, Texture1: 1, Texture0Rotated: 2, Texture1Rotated: 3, Normal0: 4, Normal1: 5});
     gui.add(params, 'save');
@@ -253,6 +255,7 @@ function render() {
         effectFinalCombine.uniforms['m'+i].value = mips["mask"][i].texture;
     }
     effectFinalCombine.uniforms['mip'].value = params.mip;
+    effectFinalCombine.uniforms['stride'].value = params.stride;
     effectFinalCombine.uniforms['t0'].value = textures[params.tex0];
     effectFinalCombine.uniforms['t1'].value = textures[params.tex1];
     effectFinalCombine.uniforms['enable'].value = params.enable;

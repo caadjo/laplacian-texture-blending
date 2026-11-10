@@ -1,0 +1,23 @@
+{
+  "platform": "Windows-11-10.0.26200-SP0",
+  "python": "3.12.14",
+  "numpy": "2.3.5",
+  "Pillow": "13.0.0",
+  "scipy": "1.18.1",
+  "depth": 6,
+  "stride": 2,
+  "pairs": {
+    "materiais": [
+      "1.jpg",
+      "2.jpg"
+    ],
+    "rotacao": [
+      "1.jpg",
+      "1rot.jpg"
+    ]
+  },
+  "masks": {
+    "perlin": "demo_webgl/perlin.jpg",
+    "rampa": "linear"
+  }
+}

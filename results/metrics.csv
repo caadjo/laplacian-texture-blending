@@ -1,0 +1,13 @@
+par,mascara,metodo,pixels_roi,percentual_roi,lods,amostras_logicas,ssim_roi,psnr_roi_db,variancia_local_roi
+materiais,perlin,lerp,209854,20.013,0,3,0.990065,30.0870,0.009528491
+materiais,perlin,lap_completo,209854,20.013,0 1 2 3 4 5 6,21,1.000000,inf,0.009353516
+materiais,perlin,lap_salto2,209854,20.013,0 2 4 6,12,0.999888,52.2471,0.009374515
+materiais,rampa,lerp,942080,89.844,0,3,0.999996,68.3968,0.008608613
+materiais,rampa,lap_completo,942080,89.844,0 1 2 3 4 5 6,21,1.000000,inf,0.008608908
+materiais,rampa,lap_salto2,942080,89.844,0 2 4 6,12,0.999999,76.8918,0.008607575
+rotacao,perlin,lerp,209854,20.013,0,3,0.998673,39.9918,0.010367268
+rotacao,perlin,lap_completo,209854,20.013,0 1 2 3 4 5 6,21,1.000000,inf,0.010299523
+rotacao,perlin,lap_salto2,209854,20.013,0 2 4 6,12,0.999913,53.3343,0.010321152
+rotacao,rampa,lerp,942080,89.844,0,3,0.999998,73.0984,0.009349327
+rotacao,rampa,lap_completo,942080,89.844,0 1 2 3 4 5 6,21,1.000000,inf,0.009348704
+rotacao,rampa,lap_salto2,942080,89.844,0 2 4 6,12,0.999999,77.1248,0.009348156
